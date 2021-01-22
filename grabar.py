@@ -1,4 +1,3 @@
-
 from sys import byteorder
 from array import array
 from struct import pack
@@ -12,11 +11,9 @@ FORMAT = pyaudio.paInt16
 RATE = 44100
 
 def is_silent(snd_data):
-    "Returns 'True' if below the 'silent' threshold"
     return max(snd_data) < THRESHOLD
 
 def normalize(snd_data):
-    "Average the volume out"
     MAXIMUM = 16384
     times = float(MAXIMUM)/max(abs(i) for i in snd_data)
 
@@ -26,7 +23,6 @@ def normalize(snd_data):
     return r
 
 def trim(snd_data):
-    "Trim the blank spots at the start and end"
     def _trim(snd_data):
         snd_started = False
         r = array('h')
@@ -40,17 +36,14 @@ def trim(snd_data):
                 r.append(i)
         return r
 
-    # Trim to the left
     snd_data = _trim(snd_data)
 
-    # Trim to the right
     snd_data.reverse()
     snd_data = _trim(snd_data)
     snd_data.reverse()
     return snd_data
 
 def add_silence(snd_data, seconds):
-    "Add silence to the start and end of 'snd_data' of length 'seconds' (float)"
     silence = [0] * int(seconds * RATE)
     r = array('h', silence)
     r.extend(snd_data)
@@ -58,15 +51,6 @@ def add_silence(snd_data, seconds):
     return r
 
 def record():
-    """
-    Record a word or words from the microphone and 
-    return the data as an array of signed shorts.
-
-    Normalizes the audio, trims silence from the 
-    start and end, and pads with 0.5 seconds of 
-    blank sound to make sure VLC et al can play 
-    it without getting chopped off.
-    """
     p = pyaudio.PyAudio()
     stream = p.open(format=FORMAT, channels=1, rate=RATE,
         input=True, output=True,
@@ -105,7 +89,6 @@ def record():
     return sample_width, r
 
 def record_to_file(path):
-    "Records from the microphone and outputs the resulting data to 'path'"
     sample_width, data = record()
     data = pack('<' + ('h'*len(data)), *data)
 
@@ -117,6 +100,6 @@ def record_to_file(path):
     wf.close()
 
 if __name__ == '__main__':
-    print("please speak a word into the microphone")
+    print("Habla en el microfono")
     record_to_file('a.wav')
-    print("done - result written to a.wav")
+    print("Se grabo el archivo demo.wav")
